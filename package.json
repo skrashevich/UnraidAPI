@@ -31,7 +31,9 @@
     "node-fetch": "^2.6.1",
     "nuxt": "^2.14.10",
     "uniqid": "^5.2.0",
-    "vuetify-loader": "^1.6.0"
+    "vuetify-loader": "^1.6.0",
+    "xmldom": "^0.6.0",
+    "xpath": "^0.0.32"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^0.0.1",

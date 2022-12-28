@@ -13,7 +13,7 @@ axios.defaults.httpsAgent = new https.Agent({ keepAlive: true, rejectUnauthorize
 let authCookies = {};
 
 export async function getImage(servers, res, path) {
-  let serverAuth = JSON.parse(fs.readFileSync((process.env.KeyStorage ? process.env.KeyStorage + "/" : "secure/") + "mqttKeys"));
+  let serverAuth = JSON.parse(fs.readFileSync((process.env.storage ? process.env.storage + "/" : "secure/") + "mqttKeys"));
   await logIn(servers, serverAuth);
   let sent = false;
 
@@ -138,7 +138,7 @@ function getUSBDetails(servers, serverAuth) {
           let row = extractValue(response.data, "<label for=\"usb", "</label>");
           servers[ip].usbDetails.push({
             id: extractValue(row, "value=\"", "\""),
-            name: extractValue(row, "/> ", " (")
+            name: extractValue(row+"</label><br/>", "value=\"\" >", "</label><br/>")
           });
           response.data = response.data.replace("<label for=\"usb", "");
         }
@@ -218,8 +218,8 @@ function scrapeHTML(ip, serverAuth) {
       cpu: extractReverseValue(extractValue(response.data, "cpu_view'>", "</tr"), "<br>", ">"),
       memory: extractValue(response.data, "Memory<br><span>", "<"),
       motherboard: extractValue(response.data, "<tr class='mb_view'><td></td><td colspan='3'>", "<"),
-      diskSpace: extractValue(extractValue(response.data, "Go to disk settings", "/span>"), "<span class='info'>", "<"),
-      cacheSpace: extractValue(extractValue(response.data, "Go to cache settings", "/span>"), "<span class='info'>", "<"),
+      diskSpace: extractValue(extractValue(extractValue(response.data, 'toggleChevron("array_view",0)',"</tr>"), "Go to disk settings", "/span>"), "<span class='info'>", "<"),
+      cacheSpace: extractValue(extractValue(extractValue(response.data, 'toggleChevron("_cache-pool_view",0)',"</tr>"), "Go to disk settings", "/span>"), "<span class='info'>", "<"),
       version: extractValue(response.data, "Version: ", "&nbsp;")
     };
 
@@ -566,20 +566,19 @@ async function simplifyResponse(object, ip, auth) {
     newVMObject.hddAllocation = {};
     newVMObject.hddAllocation.all = [];
     newVMObject.hddAllocation.total = vm.parent.children[4].contents;
-    if (vm.child.children[0].children[0].children[1].children) {
-      vm.child.children[0].children[0].children[1].children.forEach(driveDetails => {
+    /*if (vm.child.children[0].children[0].children[0].children) {
+      vm.child.children[0].children[0].children[0].children.forEach(driveDetails => {
         let detailsArr = driveDetails.children.map(drive => {
           return drive.contents;
         });
         let details = { path: detailsArr[0], interface: detailsArr[1], allocated: detailsArr[2], used: detailsArr[3] };
         newVMObject.hddAllocation.all.push(details);
       });
-    }
+    }*/
     newVMObject.primaryGPU = vm.parent.children[5].contents;
     newVMObject = await gatherDetailsFromEditVM(ip, newVMObject.id, newVMObject, auth);
     temp[newVMObject.id] = newVMObject;
   }
-  return temp;
 }
 
 export function getCSRFToken(server, auth) {
