@@ -3,7 +3,7 @@
 FROM golang:alpine as prune
 RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 go install github.com/tj/node-prune@latest
 
-FROM node:16.15.0-slim as builder
+FROM --platform=$BUILDPLATFORM node:16.15.0-slim as builder
 
 ENV NODE_ENV=production
 ENV APP_ROOT=/app
